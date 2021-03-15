@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import db, setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
@@ -13,7 +13,7 @@ def create_app(test_config=None):
   app = Flask(__name__)
   setup_db(app)
   '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+  @TODO: Set up CORS. Allowcd .. '*' for origins. Delete the sample route after completing the TODOs
   '''
   cors = CORS(app, resources={r"*": {"origins": "*"}})
 
@@ -30,9 +30,20 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  @app.route('/categories', methods=['GET'])
+  def retrieve_categories():
+    categories = [category.format() for category in Category.query.all()]
 
+    if len(categories) == 0:
+      abort(404)
 
+    return jsonify({
+      'categories': categories,
+      'success': True,
+      'total_categories': len(Category.query.all())
+    })
   '''
+
   @TODO: 
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
