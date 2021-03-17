@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, abort, jsonify
+from flask import Flask, abort, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
@@ -112,7 +112,45 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
+  @app.route('/questions', methods=['POST'])
+  def create_question():
+    body = request.get_json()
 
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_category = body.get('category', None)
+    new_difficulty = body.get('difficulty', None)
+    search_term = body.get('searchTerm', None)
+    
+    try:
+      if search_term:
+        search_results = Question.query.filter(
+          Question.question.ilike(f'%{search_term}%')).all()
+
+        return jsonify({
+          'success': True,
+          'questions': [question.format() for question in search_results],
+          'total_questions': len(search_results),
+          'current_category': None
+        })
+
+      if not ('question' in body and 'answer' in body and 'difficulty' in body and 'category' in body):
+        abort(422)
+        
+      else:  
+        question = Question(
+          question=new_question, 
+          answer=new_answer,
+          category=new_category, 
+          difficulty=new_difficulty)
+        question.insert()
+
+        return jsonify({
+          'success': True,
+          'created': question.id,
+        })
+    except:
+      abort(422)
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
