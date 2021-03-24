@@ -102,8 +102,9 @@ def create_app(test_config=None):
     
     except:
       abort(422)
+  
   '''
-  @TODO: 
+  @TODO:
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
@@ -121,7 +122,7 @@ def create_app(test_config=None):
     new_category = body.get('category', None)
     new_difficulty = body.get('difficulty', None)
     search_term = body.get('searchTerm', None)
-    
+  
     try:
       if search_term:
         search_results = Question.query.filter(
@@ -170,7 +171,30 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/categories/<int:category_id>/questions', methods=['GET'])
+  def retrieve_questions_for_catagory(category_id):
+    quest_selection = [question.format() for question in Question.query.filter(
+      Question.category == str(category_id)).all()]
+    current_questions = paginate(request, quest_selection)
 
+    if len(current_questions) == 0:
+      abort(404)
+
+    return jsonify({
+      'questions': current_questions,
+      'success': True,
+      'total_questions': len(Question.query.all()),
+      'current_catgory': category_id,
+    })
+
+  '''
+  @TODO: 
+  Create a GET endpoint to get questions based on category. 
+
+  TEST: In the "List" tab / main screen, clicking on one of the 
+  categories in the left column will cause only questions of that 
+  category to be shown. 
+  '''
 
   '''
   @TODO: 
