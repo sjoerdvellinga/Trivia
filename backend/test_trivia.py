@@ -137,6 +137,8 @@ class TriviaTestCase(unittest.TestCase):
 #   and shown whether they were correct or not. 
 
 
+Add test for no more new questions for current category => curl -X POST -H "Content-Type: application/json" -d '{"quiz_category":5, "previous_questions":[4, 6, 2]}' http://127.0.0.1:5000/quizzes
+
     def (self):
         """  """
 

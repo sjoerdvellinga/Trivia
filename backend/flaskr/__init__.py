@@ -76,7 +76,6 @@ def create_app(test_config=None):
       'questions': current_questions,
       'success': True,
       'total_questions': len(Question.query.all())
-      # SJOERD: current category + categories. 
     })
   '''
   @TODO: 
@@ -189,15 +188,6 @@ def create_app(test_config=None):
 
   '''
   @TODO: 
-  Create a GET endpoint to get questions based on category. 
-
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
-
-  '''
-  @TODO: 
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
@@ -207,14 +197,41 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods=['POST'])
+  # TODO: end-point taken from QuizView.js file in front-end. check if this is correct
+  def play_quiz():
+    body = request.get_json()
+    previous_questions = body.get("previous_questions")
+    quiz_category = int(body["quiz_category"])
 
+    if quiz_category:
+
+      if not Category.query.get(quiz_category):
+        abort(404)
+      quiz_questions = Question.query.filter(
+        Question.category.ilike(f'%{quiz_category}%'),
+        Question.id.notin_(previous_questions)
+        ).all()
+    else:
+      quiz_questions = Question.query.filter(
+        Question.id.notin_(previous_questions)).all()
+
+    if len(quiz_questions) == 0:
+      return jsonify(None)
+    else:
+      questions = list(map(Question.format, quiz_questions))
+      next_question = random.choice(questions)
+      return jsonify({
+        'question': next_question,
+        'success': True
+      })
   '''
   @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
   
-    @app.errorhandler(404)
+  @app.errorhandler(404)
   def not_found(error):
     return jsonify({
       "success": False,
