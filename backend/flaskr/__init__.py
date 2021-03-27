@@ -115,7 +115,6 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['POST'])
   def create_question():
     body = request.get_json()
-
     new_question = body.get('question', None)
     new_answer = body.get('answer', None)
     new_category = body.get('category', None)
@@ -202,7 +201,8 @@ def create_app(test_config=None):
   def play_quiz():
     body = request.get_json()
     previous_questions = body.get("previous_questions")
-    quiz_category = int(body["quiz_category"])
+
+    quiz_category = body.get("quiz_category")
 
     if quiz_category:
 
