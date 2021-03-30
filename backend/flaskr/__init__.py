@@ -8,15 +8,6 @@ from models import db, setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
-def paginate(request, quest_selection):
-  page = request.args.get('page', 1, type=int)
-  start = (page -1) * QUESTIONS_PER_PAGE
-  end = start + QUESTIONS_PER_PAGE
-
-  current_questions = quest_selection[start:end]
-
-  return current_questions
-
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
@@ -29,11 +20,16 @@ def create_app(test_config=None):
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
+
   @app.after_request
   def after_request(response):
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers',
+                         'Content-Type,Authorization,true')
+    response.headers.add('Access-Control-Allow-Methods',
+                         'GET,PUT,POST,DELETE,OPTIONS')
     return response
+
+
   '''
   @TODO: 
   Create an endpoint to handle GET requests 
@@ -41,13 +37,15 @@ def create_app(test_config=None):
   '''
   @app.route('/categories', methods=['GET'])
   def retrieve_categories():
-    categories = [category.format() for category in Category.query.all()]
+    categories = Category.query.all()
+    formatted_categories = {category.id: category.type for category in categories}
+
 
     if len(categories) == 0:
       abort(404)
 
     return jsonify({
-      'categories': categories,
+      'categories': formatted_categories,
       'success': True,
       'total_categories': len(Category.query.all())
     })
@@ -64,18 +62,33 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+
+  def paginate(request, quest_selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page -1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    current_questions = quest_selection[start:end]
+
+    return current_questions
+
   @app.route('/questions', methods=['GET'])
   def retrieve_questions():
     quest_selection = [question.format() for question in Question.query.all()]
     current_questions = paginate(request, quest_selection)
 
+    categories = Category.query.all()
+    formatted_categories = {category.id: category.type for category in categories}
+
     if len(current_questions) == 0:
       abort(404)
 
     return jsonify({
-      'questions': current_questions,
       'success': True,
-      'total_questions': len(Question.query.all())
+      'questions': current_questions,
+      'total_questions': len(Question.query.all()),
+      'categories': formatted_categories,
+      'current_category': None,
     })
   '''
   @TODO: 
@@ -125,11 +138,14 @@ def create_app(test_config=None):
       if search_term:
         search_results = Question.query.filter(
           Question.question.ilike(f'%{search_term}%')).all()
+        categories = Category.query.all()
+        formatted_categories = {category.id: category.type for category in categories}
 
         return jsonify({
           'success': True,
           'questions': [question.format() for question in search_results],
           'total_questions': len(search_results),
+          'categories': formatted_categories,
           'current_category': None
         })
 
