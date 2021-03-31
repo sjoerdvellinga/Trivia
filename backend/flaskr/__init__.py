@@ -39,8 +39,10 @@ def create_app(test_config=None):
     '''
     @app.route('/categories', methods=['GET'])
     def retrieve_categories():
+        # retrieve all categories from database
         categories = Category.query.order_by(db.desc(Category.id)).all()
 
+        # error message if no categories are stored in/returned from database
         if len(categories) == 0:
             abort(404)
 
@@ -63,6 +65,7 @@ def create_app(test_config=None):
     Clicking on the page numbers should update the questions. 
     '''
 
+
     def paginate(request, quest_selection):
         page = request.args.get('page', 1, type=int)
         start = (page -1) * QUESTIONS_PER_PAGE
@@ -74,14 +77,19 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['GET'])
     def retrieve_questions():
+        # retrieve all questions from database
         quest_selection = [question.format() for question in Question.query.all()]
+        # limit max number of questions published per page
         current_questions = paginate(request, quest_selection)
 
+        # retrieve all categories from database
         all_categories = Category.query.order_by(db.desc(Category.id)).all()
 
+        # error message if no questions are stored in/returned from database
         if len(current_questions) == 0:
             abort(404)
 
+        # API response in JSON format
         return jsonify({
         'success': True,
         'questions': current_questions,
@@ -99,7 +107,9 @@ def create_app(test_config=None):
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
+            # requested question
             question = Question.query.get(question_id)
+            # retrieve all questions from database
             questions = Question.query.order_by(db.desc(Question.id)).all()
             
             # if len(question) == 0:
@@ -107,6 +117,7 @@ def create_app(test_config=None):
             
             question.delete()
             
+            # API response in JSON format
             return jsonify({
                 'success': True,
                 'deleted': question_id,
@@ -129,6 +140,7 @@ def create_app(test_config=None):
     '''
     @app.route('/questions', methods=['POST'])
     def create_question():
+        # capture data send by POST request
         body = request.get_json()
         new_question = body.get('question', None)
         new_answer = body.get('answer', None)
@@ -137,6 +149,7 @@ def create_app(test_config=None):
         search_term = body.get('searchTerm', None)
     
         try:
+            # when search_term is provided the API shall return questions based on term.
             if search_term:
                 search_results = Question.query.filter(
                 Question.question.ilike(f'%{search_term}%')).all()
@@ -150,12 +163,14 @@ def create_app(test_config=None):
                 'current_category': None
                 })
 
+            # raise error when no data is provided in POST request
             if not ('question' in body 
                     and 'answer' in body 
                     and 'difficulty' in body 
                     and 'category' in body):
                 abort(422)
                 
+            # else, add new question to database
             else:  
                 question = Question(
                     question=new_question, 
@@ -165,6 +180,7 @@ def create_app(test_config=None):
                 )
                 question.insert()
 
+                # API response in JSON format
                 return jsonify({
                 'success': True,
                 'created': question.id,
@@ -192,14 +208,19 @@ def create_app(test_config=None):
     '''
     @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def retrieve_questions_for_catagory(category_id):
+        # retrieve questions for requested category from database
         quest_selection = [question.format() for question in Question.query.filter(
-        Question.category == str(category_id)).all()]
+            Question.category == str(category_id)).all()]
         current_questions = paginate(request, quest_selection)
+        
+        # retrieve all questions from database
         all_categories = Category.query.order_by(db.desc(Category.id)).all()
 
+        # error message if no questions are stored in/returned from database
         if len(current_questions) == 0:
             abort(404)
 
+        # API response in JSON format
         return jsonify({
             'success': True,
             'questions': current_questions,
@@ -233,15 +254,20 @@ def create_app(test_config=None):
 
             previous_questions = body['previous_questions']
 
-            if category_type == 0:  # if the category was 'All', return all the questions
+            # if the category is "0", return all the questions
+            if category_type == 0:  
                 questions = Question.query.filter(
                     Question.id.notin_(previous_questions)).all()
-            elif category_type:  # else return questions within the selected category
+                    # else return questions within the selected category
+            elif category_type:  
                 questions = Question.query.filter(Question.category == category_type,
                                                   Question.id.notin_(previous_questions)).all()
 
-            if len(questions) == 0:  # if the category is not available
+            # if the category is not available
+            if len(questions) == 0:
                 question = Question("","",None, None).format()
+            # else return random question from available questions 
+            # for catagory, excluding previous questions
             else:
                 question = random.choice(questions).format()
             if question:
