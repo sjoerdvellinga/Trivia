@@ -100,6 +100,7 @@ def create_app(test_config=None):
     def delete_question(question_id):
         try:
             question = Question.query.get(question_id)
+            questions = Question.query.order_by(db.desc(Question.id)).all()
             
             # if len(question) == 0:
             #   abort(404)
@@ -109,6 +110,8 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'deleted': question_id,
+                "questions": [question.format() for question in questions],
+                "total_questions": len(questions)
             })
         
         except:
@@ -155,10 +158,11 @@ def create_app(test_config=None):
                 
             else:  
                 question = Question(
-                question=new_question, 
-                answer=new_answer,
-                category=new_category, 
-                difficulty=new_difficulty)
+                    question=new_question, 
+                    answer=new_answer,
+                    category=new_category, 
+                    difficulty=new_difficulty
+                )
                 question.insert()
 
                 return jsonify({
@@ -218,36 +222,38 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     # TODO: end-point taken from QuizView.js file in front-end. check if this is correct
     def play_quiz():
-        body = request.get_json()
-        previous_questions = body.get("previous_questions")
-        quiz_category = body.get("quiz_category")
 
-        all_categories = Category.query.order_by(db.desc(Category.id)).all()
+        try:
+            body = request.get_json()
+            # since the frontend returns the quiz_category as dict {"type":'click', 'id':1}
+            if isinstance(body['quiz_category'], dict):
+                category_type = body['quiz_category']['id']
+            else:  # to suit the request sent using the CURL and test scripts
+                category_type = body['quiz_category']
 
-        if quiz_category:
-            if not Category.query.get(quiz_category):
-                abort(404)
-            quiz_questions = Question.query.filter(
-                Question.category.ilike(f'%{quiz_category}%'),
-                Question.id.notin_(previous_questions)
-            ).all()
-        else:
-            quiz_questions = Question.query.filter(
-                Question.id.notin_(previous_questions)).all()
+            previous_questions = body['previous_questions']
 
-        if len(quiz_questions) == 0:
-            return jsonify(None)
-        else:
-            questions = list(map(Question.format, quiz_questions))
-            next_question = random.choice(questions)
-            return jsonify({
-                'success': True,
-                'question': next_question,
-                'quizCategory': next_question.catagory,
-                'previousQuestions': previous_questions, 
-                'categories': {category.id: category.type for category in all_categories},
-                'currentQuestion': next_question
-            })
+            if category_type == 0:  # if the category was 'All', return all the questions
+                questions = Question.query.filter(
+                    Question.id.notin_(previous_questions)).all()
+            elif category_type:  # else return questions within the selected category
+                questions = Question.query.filter(Question.category == category_type,
+                                                  Question.id.notin_(previous_questions)).all()
+
+            if len(questions) == 0:  # if the category is not available
+                question = Question("","",None, None).format()
+            else:
+                question = random.choice(questions).format()
+            if question:
+                return jsonify({
+                    "success": True,
+                    "question": question
+                })
+        except Exception:
+            abort(404)
+
+
+
 
     '''
     @TODO: 
