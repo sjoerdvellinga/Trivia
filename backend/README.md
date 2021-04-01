@@ -1,27 +1,28 @@
 # API Reference
 
 ## Getting Started
+Application runs only on localhost, port 5000 (backend)  
 Base URL: *http://127.0.0.1:5000/*  
 Authentication: No authentication required.
 
 ## Error Handling
 Errors are returned as JSON objects:
 
-**Example**:
-$ curl http://127.0.0.1:5000/NotValid
-
+**Example**:  
+$ curl http://127.0.0.1:5000/NotValid  
+  
 {
-  "error": 404, 
-  "message": "resource not found", 
-  "success": false
-}
-
+  "error": 404,  
+  "message": "resource not found",  
+  "success": false  
+}  
+  
 Other returned error codes:
 
-400: Bad request
-404: Resource not found
-405: Method not allowed
-422: Unprocessable
+400: Bad request  
+404: Resource not found  
+405: Method not allowed  
+422: Unprocessable  
 
 ## Endpoints
 ### /categories    (method: GET)
@@ -80,7 +81,7 @@ $ curl http://127.0.0.1:5000/questions
       "question": "What boxer's original name is Cassius Clay?"  
     },  
     {  
-      < É >  
+      < _ _ _ >  
     }  
   ],  
   "success": true,  
@@ -132,11 +133,7 @@ $ curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: applicat
     "categories": {  
         "0": "Test",  
         "1": "Science",  
-        "2": "Art",  
-        "3": "Geography",  
-        "4": "History",  
-        "5": "Entertainment",  
-        "6": "Sports"  
+        < _ _ _ >   
     },  
     "current_category": None  
 }    
@@ -157,11 +154,7 @@ $ curl -X GET http://127.0.0.1:5000/categories/1/questions
   "categories": {  
     "0": "Test",  
     "1": "Science",  
-    "2": "Art",  
-    "3": "Geography",  
-    "4": "History",  
-    "5": "Entertainment",  
-    "6": "Sports"  
+    < _ _ _ >   
   },  
   "current_category": 1,  
   "questions": [  
@@ -212,7 +205,7 @@ $ curl -X DELETE http://127.0.0.1:5000/questions/31
       "question": "What is the nearest planet to the sun?"  
     },  
     {  
-      < É >  
+       < _ _ _ > 
     },  
   ],  
   "success": true,  
