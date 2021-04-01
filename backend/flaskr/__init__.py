@@ -316,7 +316,7 @@ def create_app(test_config=None):
         return jsonify({
         "success": False,
         "error": 405,
-        "message":"method not allowed"
+        "message":"method not allowed for endpoint"
         }), 405
 
     return app
