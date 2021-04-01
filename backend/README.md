@@ -1,13 +1,13 @@
-API Reference
+# API Reference
 
-Getting Started
-Base URL: http://127.0.0.1:5000/
+## Getting Started
+Base URL: *http://127.0.0.1:5000/*
 Authentication: No authentication required.
 
-Error Handling
+## Error Handling
 Errors are returned as JSON objects:
 
-Example:
+**Example**:
 $ curl http://127.0.0.1:5000/NotValid
 
 {
@@ -23,14 +23,14 @@ Other returned error codes:
 405: Method not allowed
 422: Unprocessable
 
-Endpoints
-/questions    (method: GET)
-# retrieve all categories
+## Endpoints
+### /categories    (method: GET)
+*retrieve all categories*
 
-General:
+**General**:
 Returns lists of categories, success value and total number of categories.
 
-Example:
+**Example**:
 $ curl http://127.0.0.1:5000/categories
 
 {
@@ -48,14 +48,14 @@ $ curl http://127.0.0.1:5000/categories
 }
 
 
-/questions    (method: GET)
-# retrieve all questions
+### /questions    (method: GET)
+*retrieve all questions*
 
-General:
+**General**:
 Returns lists of categories, a list of questions, a success value and the total number of questions.
 Results are paginated in groups (default per 10), include a request argument to choose page number, starting from 1 (which is also a default value)
 
-Example:
+**Example**:
 $ curl http://127.0.0.1:5000/questions
 
 {
@@ -88,28 +88,28 @@ $ curl http://127.0.0.1:5000/questions
   "total_questions": 19
 }
 
-/questions    (method: POST)
-# add new question to the quiz
+### /questions    (method: POST)
+*add new question to the quiz*
 
-General:
+**General**:
 Creates a new question including the answer, the difficulty (value between 1 and 5) and category the question belongs to.
 
 Returns success value, questions list paginated based on the page number, the inserted question, and total number of questions
 
-Example: 
+**Example**:
 $ curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"quesiton":"What is the nearest planet to the sun?", "answer":"Mercury", "difficulty":1, "category":1}'
 {
     "success": True,
 	“created”: 29
 }
 
-/questions    (method: POST)
-# search for questions based on search term
+### /questions    (method: POST)
+*search for questions based on search term*
 
-Genreal:
+**General**:
 Returns success value, number of total questions,current category, and questions list that contains the given search term paginated baased on current page number.
 
-Example:
+**Example**:
 $ curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: application/json" -d '{"searchTerm":"title"}'
 
     {
@@ -144,16 +144,16 @@ $ curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: applicat
     }
   }
 
-/categories/<int:category_id>/questions    (method: GET)
-# retrieve all questions in a category
+### /categories/<int:category_id>/questions    (method: GET)
+*retrieve all questions in a category*
 
-General:
+**General**:
 Get all the questions, paginated to 10 questions a page assigned to a specified category.
 (10 is default max questions per page).
 
 Returns the categories, current/selected category, list of questions belonging to the current category, success value and the total number of questions.
 
-Example:
+**Example**:
 $ curl -X GET http://127.0.0.1:5000/categories/1/questions
 
 {
@@ -187,14 +187,14 @@ $ curl -X GET http://127.0.0.1:5000/categories/1/questions
   "total_questions": 19
 }
 
-/questions    (method: DELETE)
-# delete a specific question
+### /questions    (method: DELETE)
+*delete a specific question*
 
-General:
+**General**:
 Deleted the question with the given ID, if exists
 Returns success value, the deleted question id, the number of total questions, and questions list paginated based on the current page number.
 
-Example:
+**Example**:
 $ curl -X DELETE http://127.0.0.1:5000/questions/31
 
 {
@@ -222,10 +222,10 @@ $ curl -X DELETE http://127.0.0.1:5000/questions/31
   "total_questions": 20
 }
 
-/quizzes    (method: GET)
-# Get a new question
+### /quizzes    (method: GET)
+*Get a new question*
 
-General:
+**General**:
 Returns a random next question respecting category and previous questions
 
 Input: 
