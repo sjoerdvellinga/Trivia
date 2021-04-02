@@ -260,7 +260,7 @@ def create_app(test_config=None):
                     Question.id.notin_(previous_questions)).all()
                     # else return questions within the selected category
             elif category_type:  
-                questiongis = Question.query.filter(Question.category == category_type,
+                questions = Question.query.filter(Question.category == category_type,
                                                   Question.id.notin_(previous_questions)).all()
 
             # if the category is not available
