@@ -38,19 +38,38 @@ class TriviaTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
         
-        # input to submit a new question
+        # input to submit a new question (positive test)
         self.add_question = {
             "question": "Whats is Caryn McCarthy's favorite author?",
             "answer": "Neill Gaiman",
             "difficulty": 1,
             "category": 2
         }
+        # failure to submit a new question (negative test)
+        self.fail_add_question = {
+            # 'difficulty' is missing!
+            "question": "What planet is closed to the sun?",
+            "answer": "Mercury",
+            "category": 1
+        }
 
-        #input for play game
+        #input for play game (positive test)
         self.play_quiz = {
-            "quiz_category":5, "previous_questions":4
+            "quiz_category":5,
+            "previous_questions":[5,]
         }
     
+        #error for input to play game (negative test)
+        self.error_play_quiz = {
+            "quiz_category":"Entertainment",
+            "previous_questions":[5,]
+        }
+
+        self.wrongdata_play_quiz = {
+            "field01":"Something not existing",
+            "field02":"Something else not existing"
+        }
+
     def tearDown(self):
         """Executed after reach test"""
         pass
@@ -106,22 +125,28 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(data['message'], 'method not allowed')
+        self.assertEqual(data['message'], 'method not allowed for endpoint')
         self.assertEqual(data['success'], False)
 
+    def test_get_paginated_questions(self):
+        result = self.client().get('/questions?page=1')
+        data = json.loads(result.data)
 
-    def test_add_question_1(self):
-        """ Create an endpoint to POST a new question """
-        response = self.client().post('/questions/', json=self.add_question)
-        data = json.loads(response.data)
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["total_questions"])
+        self.assertTrue(len(data["categories"]))
+        self.assertTrue(len(data["questions"]))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['question'], 'new question')
-        self.assertEqual(data['answer'], 'new answer')
-        self.assertEqual(data['category'], '1')
-        self.assertEqual(data['difficulty'], '3')
+    def test_404_get_paginated_questions_beyond_valid_page(self):
+        result = self.client().get('/questions?page=9999')
+        data = json.loads(result.data)
 
-    def test_add_question_2(self):
+        self.assertEqual(result.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+
+    def test_add_question(self):
         """ Test adding new question to database """
         # count number of questions in initial db
         initial_questions = len(Question.query.all())
@@ -146,15 +171,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(data["questions"]), 2)
     
     def test_delete_question(self):
-        """ Create an endpoint to DELETE question using a question ID """
+        """ Test DELETE method for '/questions' using unique question ID """
         response = self.client().delete('/questions/20')
         data = json.loads(response.data)
-        #deleted_question = Question.query.filter(question.id == 10).one_or_none()
-
+        
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 20)
-        self.assertEqual(data['deleted_question'], None)
+        self.assertTrue(data["total_questions"])
+
+    def test_404_delete_question(self):
+        result = self.client().delete('/questions/9999')
+        data = json.loads(result.data)
+
+        self.assertEqual(result.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
 
     def test_invalid_questions_page(self):
         """Test GET invalid questions page """
@@ -197,14 +228,55 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertTrue(new_questions - initial_questions == 1)
 
+    def test_422_post_new_question(self):
+        # post new question to db, with 1 missing field (difficulty)
+        response = self.client().post("/questions", json=self.fail_add_question)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "data is unprocessable")
+
+    def test_get_paginated_question_by_category(self):
+        response = self.client().get('/categories/1/questions?page=1')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["total_questions"])
+        self.assertTrue(len(data["categories"]))
+        self.assertTrue(len(data["questions"]))
+
+    def test_404_get_paginated_question_by_category_beyond_valid_page(self):
+        response = self.client().get('/categories/1/questions?page=100')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+
     def test_play_game(self):
         response = self.client().post("/quizzes", json=self.play_quiz)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(len(data["question"]), 2)
 
+    def test_404_play_game(self):
+        response = self.client().post("/quizzes", json=self.error_play_quiz)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
+
+    def test_422_play_game(self):
+        response = self.client().post('/quizzes', json=self.wrongdata_play_quiz)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
