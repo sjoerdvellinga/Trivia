@@ -24,6 +24,37 @@ Other returned error codes:
 405: Method not allowed  
 422: Unprocessable  
 
+## Project dependencies
+Setup a virtual envirionment with Python 3.9.
+
+And install dependent packages from requirements.txt with command:
+
+PIP3 install -r requirements.txt
+Note: Make sure that you are running version 1.0.1 of 'Werkzeug' or later. Earlier versions are not compatible with Python 3.9x.
+
+### Database Setup
+With Postgres running, restore a database using the trivia.psql file provided. From the backend folder in terminal run:
+
+psql trivia < trivia.psql
+
+### Project Server
+From within the backend directory first ensure you are working using your created virtual environment.
+
+To run the server, execute:
+
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+
+
+## Testing
+To run the tests, run in BASH:
+
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < trivia.psql
+python test_flaskr.py
+
 ## Endpoints
 ### /categories    (method: GET)
 *retrieve all categories*
@@ -62,7 +93,7 @@ $ curl http://127.0.0.1:5000/questions
   "categories": {  
     "0": "Test",  
     "1": "Science",  
-    < É >  
+    < ï¿½ >  
   },  
   "current_category": null,  
   "questions": [ 
@@ -101,7 +132,7 @@ $ curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/jso
   
 {  
     "success": True,  
-	ÒcreatedÓ: 29  
+	ï¿½createdï¿½: 29  
 }  
 
 ### /questions    (method: POST)
@@ -219,8 +250,8 @@ $ curl -X DELETE http://127.0.0.1:5000/questions/31
 Returns a random next question respecting category and previous questions
 
 Input: 
-Òquiz_categoryÓ (string) or (dict)
-Òprevious_questionsÓ (array) (optional)
+ï¿½quiz_categoryï¿½ (string) or (dict)
+ï¿½previous_questionsï¿½ (array) (optional)
 
 Example:
 $ curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"quiz_category":5, "previous_questions":[ ]}'  
@@ -232,6 +263,6 @@ $ curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/jso
     "category": 1,  
     "difficulty": 2,  
     "id": 22,  
-    "question": ÒHematology is a branch of medicine involving the study of what?Ó  
+    "question": ï¿½Hematology is a branch of medicine involving the study of what?ï¿½  
   }  
 }  
