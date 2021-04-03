@@ -29,8 +29,8 @@ Setup a virtual envirionment with Python 3.9.
 
 And install dependent packages from requirements.txt with command:
 
-PIP3 install -r requirements.txt
-Note: Make sure that you are running version 1.0.1 of 'Werkzeug' or later. Earlier versions are not compatible with Python 3.9x.
+PIP3 install -r requirements.txt  
+**Note**: Make sure that you are running version 1.0.1 of 'Werkzeug' or later. Earlier versions are not compatible with Python 3.9x.
 
 ### Database Setup
 With Postgres running, restore a database using the trivia.psql file provided. From the backend folder in terminal run:
