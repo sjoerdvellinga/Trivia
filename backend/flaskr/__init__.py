@@ -276,17 +276,16 @@ def create_app(test_config=None):
                     Question.category == category_type,
                     Question.id.notin_(previous_questions)).all()
 
-            # if the category is not available
-            if len(questions) == 0:
-                question = Question("", "", None, None).format()
             # else return random question from available questions
-            # for catagory, excluding previous questions
-            else:
+            if len(questions) > 0:
                 question = random.choice(questions).format()
-            if question:
-                return jsonify({
-                    "success": True,
-                    "question": question
+            # if the category is not available
+            else:
+                question = None
+            
+            return jsonify({
+                "success": True,
+                "question": question
                 })
         except Exception:
             abort(404)
